@@ -269,19 +269,24 @@ describe('Protocol Staking', function () {
       await this.mock.connect(this.admin).addEligibleAccount(this.staker2);
 
       await this.mock.connect(this.admin).setRewardRate(ethers.parseEther('0.5'));
+
+      // Staker 1 stakes ... wait (10 second) ... and unstakes
       await this.mock.connect(this.staker1).stake(ethers.parseEther('100'));
+
       await timeIncreaseNoMine(10);
 
       await this.mock.connect(this.staker1).unstake(this.staker1, ethers.parseEther('100'));
+
+      // time passes (10 seconds) while no one is staked
       await timeIncreaseNoMine(10);
-      await this.mock.release(this.staker1);
 
+      // Staker 2 stakes ... wait (1 second)
       await this.mock.connect(this.staker2).stake(ethers.parseEther('100'));
-      await timeIncreaseNoMine(1);
-      await mine();
-      await expect(this.mock.earned(this.staker2)).to.eventually.eq(ethers.parseEther('0.5'));
 
-      await expect(this.mock.earned(this.staker1)).to.eventually.eq(ethers.parseEther('5'));
+      await time.increase(1);
+
+      await expect(this.mock.earned(this.staker1)).to.eventually.equal(ethers.parseEther('5.0')); // 0.5 * 10
+      await expect(this.mock.earned(this.staker2)).to.eventually.equal(ethers.parseEther('0.5')); // 0.5 * 1
     });
 
     it('then old staker returns', async function () {
@@ -291,6 +296,7 @@ describe('Protocol Staking', function () {
       await this.mock.connect(this.admin).setRewardRate(ethers.parseEther('0.5'));
       await this.mock.connect(this.staker1).stake(ethers.parseEther('100'));
       await this.mock.connect(this.staker2).stake(ethers.parseEther('100'));
+
       await timeIncreaseNoMine(10);
 
       // 3 in rewards for 1 (since 1 block at the beginning alone)
@@ -299,19 +305,16 @@ describe('Protocol Staking', function () {
       await this.mock.connect(this.staker2).unstake(this.staker2, ethers.parseEther('100'));
 
       await timeIncreaseNoMine(10);
-      await this.mock.release(this.staker1);
-      await this.mock.release(this.staker2);
 
-      await timeIncreaseNoMine(100);
+      await expect(this.mock.earned(this.staker1)).to.eventually.equal(ethers.parseEther('3.0'));
+      await expect(this.mock.earned(this.staker2)).to.eventually.equal(ethers.parseEther('3.0'));
 
       await this.mock.connect(this.staker1).stake(ethers.parseEther('100'));
-      await timeIncreaseNoMine(1);
-      await mine();
-      // Only earn 0.5 more
-      await expect(this.mock.earned(this.staker1)).to.eventually.eq(ethers.parseEther('3.5'));
+      await time.increase(1);
 
-      // pervious staker retains reward
-      await expect(this.mock.earned(this.staker2)).to.eventually.eq(ethers.parseEther('3'));
+      // staker 0.5 gets one more from the extra block
+      await expect(this.mock.earned(this.staker1)).to.eventually.eq(ethers.parseEther('3.5'));
+      await expect(this.mock.earned(this.staker2)).to.eventually.eq(ethers.parseEther('3.0'));
     });
   });
 
@@ -387,9 +390,8 @@ describe('Protocol Staking', function () {
         await timeIncreaseNoMine(10);
 
         await this.mock.connect(this.admin).removeEligibleAccount(this.staker1);
-        await timeIncreaseNoMine(100);
+        await time.increase(100);
 
-        await mine();
         expect(await this.mock.earned(this.staker1)).to.be.equal(ethers.parseEther('5'));
       });
     });
