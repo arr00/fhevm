@@ -274,7 +274,6 @@ describe('Protocol Staking', function () {
 
       await this.mock.connect(this.staker1).unstake(this.staker1, ethers.parseEther('100'));
       await timeIncreaseNoMine(10);
-      await this.mock.release(this.staker1);
 
       await this.mock.connect(this.staker2).stake(ethers.parseEther('100'));
       await timeIncreaseNoMine(1);
@@ -297,11 +296,6 @@ describe('Protocol Staking', function () {
       await this.mock.connect(this.staker1).unstake(this.staker1, ethers.parseEther('100'));
       // 3 in rewards for 2 (since 1 block at the end alone)
       await this.mock.connect(this.staker2).unstake(this.staker2, ethers.parseEther('100'));
-
-      await timeIncreaseNoMine(10);
-      await this.mock.release(this.staker1);
-      await this.mock.release(this.staker2);
-
       await timeIncreaseNoMine(100);
 
       await this.mock.connect(this.staker1).stake(ethers.parseEther('100'));
