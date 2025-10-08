@@ -244,7 +244,11 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
         uint256 oldTotalWeight = $._totalEligibleStakedWeight;
         $._totalEligibleStakedWeight = oldTotalWeight - weightBefore + weightAfter;
 
-        if (weightBefore != weightAfter && oldTotalWeight > 0) {
+        if (oldTotalWeight == 0) {
+            $._lastUpdateReward = 0;
+            $._totalVirtualPaid = 0;
+            $._lastUpdateTimestamp = Time.timestamp();
+        } else if (weightBefore != weightAfter) {
             if (weightBefore > weightAfter) {
                 int256 virtualAmount = SafeCast.toInt256(_allocation(weightBefore - weightAfter, oldTotalWeight));
                 $._paid[user] -= virtualAmount;
@@ -254,10 +258,6 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
                 $._paid[user] += virtualAmount;
                 $._totalVirtualPaid += virtualAmount;
             }
-        } else if (oldTotalWeight == 0) {
-            $._lastUpdateReward = 0;
-            $._totalVirtualPaid = 0;
-            $._lastUpdateTimestamp = Time.timestamp();
         }
     }
 
