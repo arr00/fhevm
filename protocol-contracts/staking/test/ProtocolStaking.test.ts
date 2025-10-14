@@ -18,7 +18,7 @@ describe('Protocol Staking', function () {
 
     await Promise.all(
       [staker1, staker2].flatMap(account => [
-        token.mint(account, ethers.parseEther('1000')),
+        token.mint(account, ethers.parseEther('2000')),
         token.$_approve(account, mock, ethers.MaxUint256),
       ]),
     );
@@ -261,6 +261,20 @@ describe('Protocol Staking', function () {
         .to.emit(this.token, 'Transfer')
         .withArgs(ethers.ZeroAddress, this.staker2, anyValue);
     });
+  });
+
+  it('earned may revert', async function () {
+    await this.mock.connect(this.admin).addEligibleAccount(this.staker1);
+    await this.mock.connect(this.admin).addEligibleAccount(this.staker2);
+    await this.mock.connect(this.admin).setRewardRate(ethers.parseEther('0.5'));
+
+    await this.mock.connect(this.staker1).stake(ethers.parseEther('1000'));
+    await this.mock.connect(this.admin).setRewardRate(ethers.parseEther('0'));
+
+    await this.mock.connect(this.staker2).stake(ethers.parseEther('1000'));
+    await this.mock.connect(this.staker1).stake(ethers.parseEther('1'));
+
+    await expect(this.mock.earned(this.staker2)).to.be.reverted;
   });
 
   describe('Manage Eligible Accounts', function () {
