@@ -209,7 +209,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
      * @dev Gets the current protocol reward rate in tokens distributed per second.
      * @return The reward rate.
      */
-    function rewardRate() public virtual view returns (uint256) {
+    function rewardRate() public view virtual returns (uint256) {
         return _getProtocolStakingStorage()._rewardRate;
     }
 
