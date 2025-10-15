@@ -104,7 +104,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
      * @param recipient The recipient where unstaked tokens should be sent.
      * @param amount The amount of tokens to unstake.
      *
-     * NOTE: Unstaked tokens will not be sent immediately if {unstakeCooldownPeriod} is non-zero.
+     * NOTE: Unstaked tokens can only be released after {_unstakeCooldownPeriod}.
      */
     function unstake(address recipient, uint256 amount) public virtual {
         _burn(msg.sender, amount);
@@ -223,7 +223,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
 
     /**
      * @dev Gets the staking weight for a given raw amount.
-     * @param amount The amount being wheighted.
+     * @param amount The amount being weighted.
      * @return The staking weight.
      */
     function weight(uint256 amount) public view virtual returns (uint256) {
