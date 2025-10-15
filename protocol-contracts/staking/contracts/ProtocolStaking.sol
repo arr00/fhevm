@@ -58,9 +58,9 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     /// @dev Emitted when the reward recipient of an account is updated.
     event RewardsRecipientSet(address indexed account, address indexed recipient);
 
-    /// @dev The account is already an eligible accounts.
+    /// @dev The account is already an eligible account.
     error EligibleAccountAlreadyExists(address account);
-    /// @dev The account is not an eligible accounts.
+    /// @dev The account is not an eligible account.
     error EligibleAccountDoesNotExist(address account);
     /// @dev The tokens cannot be transferred.
     error TransferDisabled();
