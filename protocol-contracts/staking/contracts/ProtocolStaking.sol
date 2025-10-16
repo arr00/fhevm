@@ -55,6 +55,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     error InvalidAmount();
     error EligibleAccountAlreadyExists(address account);
     error EligibleAccountDoesNotExist(address account);
+    error InvalidEligibleAccount(address account);
     error TransferDisabled();
     error InvalidUnstakeCooldownPeriod();
 
@@ -219,6 +220,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     function _grantRole(bytes32 role, address account) internal virtual override returns (bool) {
         bool success = super._grantRole(role, account);
         if (role == ELIGIBLE_ACCOUNT_ROLE && success) {
+            require(account != address(0), InvalidEligibleAccount(account));
             _updateRewards(account, 0, weight(balanceOf(account)));
         }
         return success;
@@ -264,12 +266,12 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     function _update(address from, address to, uint256 value) internal virtual override {
         // Disable Transfers
         require(from == address(0) || to == address(0), TransferDisabled());
-        if (from != address(0) && isEligibleAccount(from)) {
+        if (isEligibleAccount(from)) {
             uint256 balanceBefore = balanceOf(from);
             uint256 balanceAfter = balanceBefore - value;
             _updateRewards(from, weight(balanceBefore), weight(balanceAfter));
         }
-        if (to != address(0) && isEligibleAccount(to)) {
+        if (isEligibleAccount(to)) {
             uint256 balanceBefore = balanceOf(to);
             uint256 balanceAfter = balanceBefore + value;
             _updateRewards(to, weight(balanceBefore), weight(balanceAfter));
