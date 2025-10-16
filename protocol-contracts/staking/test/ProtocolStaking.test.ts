@@ -308,6 +308,7 @@ describe('Protocol Staking', function () {
 
       await expect(this.mock.earned(this.staker1)).to.eventually.equal(ethers.parseEther('3.0'));
       await expect(this.mock.earned(this.staker2)).to.eventually.equal(ethers.parseEther('3.0'));
+      await timeIncreaseNoMine(100);
 
       await this.mock.connect(this.staker1).stake(ethers.parseEther('100'));
       await time.increase(1);
