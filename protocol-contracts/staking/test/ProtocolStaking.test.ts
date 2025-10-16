@@ -350,6 +350,12 @@ describe('Protocol Staking', function () {
 
         await expect(this.mock.totalStakedWeight()).to.eventually.eq(weightBefore + staker1Weight);
       });
+
+      it("can't add zero address", async function () {
+        await expect(this.mock.connect(this.admin).addEligibleAccount(ethers.ZeroAddress))
+          .to.be.revertedWithCustomError(this.mock, 'InvalidEligibleAccount')
+          .withArgs(ethers.ZeroAddress);
+      });
     });
 
     describe('Remove Eligible Account', function () {
