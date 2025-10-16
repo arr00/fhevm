@@ -28,16 +28,16 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
         uint256 _totalEligibleStakedWeight;
         // Stake - release
         uint256 _unstakeCooldownPeriod;
-        mapping(address => Checkpoints.Trace208) _unstakeRequests;
-        mapping(address => uint256) _released;
+        mapping(address recipient => Checkpoints.Trace208) _unstakeRequests;
+        mapping(address recipient => uint256) _released;
         // Reward - issuance curve
         uint256 _lastUpdateTimestamp;
         uint256 _lastUpdateReward;
         uint256 _rewardRate;
         // Reward - recipient
-        mapping(address => address) _rewardsRecipient;
+        mapping(address staker => address) _rewardsRecipient;
         // Reward - payment tracking
-        mapping(address => int256) _paid;
+        mapping(address staker => int256) _paid;
         int256 _totalVirtualPaid;
     }
 
@@ -205,6 +205,14 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
         return $._unstakeRequests[account].latest() - $._released[account];
     }
 
+    /**
+     * @dev Gets the current protocol reward rate in tokens distributed per second.
+     * @return The reward rate.
+     */
+    function rewardRate() public view returns (uint256) {
+        return _getProtocolStakingStorage()._rewardRate;
+    }
+
     /// @dev Returns the recipient for rewards earned by `account`.
     function rewardsRecipient(address account) public view virtual returns (address) {
         address storedRewardsRecipient = _getProtocolStakingStorage()._rewardsRecipient[account];
@@ -233,7 +241,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     }
 
     function _setUnstakeCooldownPeriod(uint256 unstakeCooldownPeriod_) internal virtual {
-        if (unstakeCooldownPeriod_ == 0) revert InvalidUnstakeCooldownPeriod();
+        require(unstakeCooldownPeriod_ != 0, InvalidUnstakeCooldownPeriod());
         _getProtocolStakingStorage()._unstakeCooldownPeriod = unstakeCooldownPeriod_;
 
         emit UnstakeCooldownPeriodSet(unstakeCooldownPeriod_);
