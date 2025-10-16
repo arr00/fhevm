@@ -17,7 +17,11 @@ contract ProtocolOperatorRegistry {
         0xf4991778404f39da1b7149b42e8195e0a86139aeb8fe7585bc5520f58085de00;
 
     /// @dev Emitted when a caller sets its staking account.
-    event StakedTokensAccountSet(address operator, address previousStakedTokensAccount, address newStakedTokensAccount);
+    event StakedTokensAccountSet(
+        address indexed operator,
+        address indexed previousStakedTokensAccount,
+        address indexed newStakedTokensAccount
+    );
 
     /// @dev The caller is not the owner of the staking account.
     error StakingAccountNotOwnedByCaller();
