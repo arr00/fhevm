@@ -37,11 +37,13 @@ describe('ProtocolOperatorRegistry', function () {
     await expect(this.mock.stakedTokens(this.owner)).to.eventually.eq(ethers.ZeroAddress);
   });
 
-  it('should register as operator of staking token by new owner', async function () {
+  it('should register as operator of staking account by new owner', async function () {
     await this.mock.connect(this.owner).setStakedTokensAccount(this.ownable);
     await this.ownable.$_transferOwnership(this.receiver);
 
     await expect(this.mock.connect(this.receiver).setStakedTokensAccount(this.ownable))
+      .to.emit(this.mock, 'StakedTokensAccountSet')
+      .withArgs(this.owner, this.ownable, ethers.ZeroAddress)
       .to.emit(this.mock, 'StakedTokensAccountSet')
       .withArgs(this.receiver, ethers.ZeroAddress, this.ownable);
 

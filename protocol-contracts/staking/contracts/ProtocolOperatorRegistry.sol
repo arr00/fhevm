@@ -34,7 +34,7 @@ contract ProtocolOperatorRegistry {
             require(Ownable(account).owner() == msg.sender, StakingAccountNotOwnedByCaller());
             address oldOwner = operator(account);
             if (oldOwner != address(0)) {
-                $._operatorToStakedTokens[oldOwner] = address(0); // unset stake tokens account of old owner
+                _setStakingAccount(oldOwner, account, address(0)); // unset staking account of old owner
             }
             $._stakedTokensToOperator[account] = msg.sender;
         }
@@ -43,9 +43,7 @@ contract ProtocolOperatorRegistry {
         if (currentStakedTokensAccount != address(0)) {
             $._stakedTokensToOperator[currentStakedTokensAccount] = address(0);
         }
-        $._operatorToStakedTokens[msg.sender] = account;
-
-        emit StakedTokensAccountSet(msg.sender, currentStakedTokensAccount, account);
+        _setStakingAccount(msg.sender, currentStakedTokensAccount, account);
     }
 
     /// @dev Staked tokens account associated with a given operator account.
@@ -56,6 +54,12 @@ contract ProtocolOperatorRegistry {
     /// @dev Gets operator account associated with a given staked tokens account.
     function operator(address account) public view returns (address) {
         return _getProtocolOperatorRegistryStorage()._stakedTokensToOperator[account];
+    }
+
+    /// @dev Sets the staking account of an operator.
+    function _setStakingAccount(address operator_, address oldStakingAccount, address newStakingAccount) private {
+        _getProtocolOperatorRegistryStorage()._operatorToStakedTokens[operator_] = newStakingAccount;
+        emit StakedTokensAccountSet(operator_, oldStakingAccount, newStakingAccount);
     }
 
     function _getProtocolOperatorRegistryStorage() private pure returns (ProtocolOperatorRegistryStorage storage $) {
