@@ -4,7 +4,10 @@ pragma solidity ^0.8.27;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-/// @dev This contract creates a registry for operator to indicate which account holds their staked tokens.
+/**
+ *  @dev This contract creates a registry for operator to indicate which account holds their staked tokens.
+ * @custom:security-contact hello@zama.ai
+ */
 contract ProtocolOperatorRegistry {
     /// @custom:storage-location erc7201:zama.storage.ProtocolOperatorRegistry
     struct ProtocolOperatorRegistryStorage {

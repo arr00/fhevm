@@ -16,7 +16,10 @@ interface IERC20Mintable is IERC20 {
     function mint(address to, uint256 amount) external;
 }
 
-/// @dev Rewards eligible accounts staking tokens on this contract.
+/**
+ * @dev Rewards eligible accounts staking tokens on this contract.
+ * @custom:security-contact hello@zama.ai
+ */
 contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20VotesUpgradeable, UUPSUpgradeable {
     using Checkpoints for Checkpoints.Trace208;
     using SafeERC20 for IERC20;
