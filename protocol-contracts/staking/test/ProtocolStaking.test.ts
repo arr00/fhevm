@@ -330,7 +330,7 @@ describe('Protocol Staking', function () {
       it('should emit event', async function () {
         await expect(this.mock.connect(this.manager).addEligibleAccount(this.staker1))
           .to.emit(this.mock, 'RoleGranted')
-          .withArgs(ethers.id('eligible-account-role'), this.staker1, this.manager);
+          .withArgs(ethers.id('ELIGIBLE_ACCOUNT_ROLE'), this.staker1, this.manager);
       });
 
       it('should reflect in eligible account storage', async function () {
@@ -367,7 +367,7 @@ describe('Protocol Staking', function () {
       it('should emit event', async function () {
         await expect(this.mock.connect(this.manager).removeEligibleAccount(this.staker1))
           .to.emit(this.mock, 'RoleRevoked')
-          .withArgs(ethers.id('eligible-account-role'), this.staker1, this.manager);
+          .withArgs(ethers.id('ELIGIBLE_ACCOUNT_ROLE'), this.staker1, this.manager);
       });
 
       it('should reflect in eligible account list', async function () {

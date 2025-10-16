@@ -46,7 +46,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
         0x6867237db38693700f305f18dff1dbf600e282237f7d452b4c792e6b019c6b00;
     bytes32 private constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 private constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
-    bytes32 private constant ELIGIBLE_ACCOUNT_ROLE = keccak256("eligible-account-role");
+    bytes32 private constant ELIGIBLE_ACCOUNT_ROLE = keccak256("ELIGIBLE_ACCOUNT_ROLE");
 
     event TokensStaked(address indexed account, uint256 amount);
     event TokensUnstaked(address indexed account, address indexed recipient, uint256 amount);
