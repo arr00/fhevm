@@ -32,16 +32,16 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
         uint256 _totalEligibleStakedWeight;
         // Stake - release
         uint256 _unstakeCooldownPeriod;
-        mapping(address => Checkpoints.Trace208) _unstakeRequests;
-        mapping(address => uint256) _released;
+        mapping(address recipient => Checkpoints.Trace208) _unstakeRequests;
+        mapping(address recipient => uint256) _released;
         // Reward - issuance curve
         uint256 _lastUpdateTimestamp;
         uint256 _lastUpdateReward;
         uint256 _rewardRate;
         // Reward - recipient
-        mapping(address => address) _rewardsRecipient;
+        mapping(address staker => address) _rewardsRecipient;
         // Reward - payment tracking
-        mapping(address => int256) _paid;
+        mapping(address staker => int256) _paid;
         int256 _totalVirtualPaid;
     }
 
@@ -54,6 +54,10 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     event TokensStaked(address indexed account, uint256 amount);
     /// @dev Emitted when tokens are unstaked by an account.
     event TokensUnstaked(address indexed account, address indexed recipient, uint256 amount);
+    /// @dev Emitted when tokens are released to a recipient after the unstaking cooldown period.
+    event TokensReleased(address indexed recipient, uint256 amount);
+    /// @dev Emitted when rewards of an account are claimed.
+    event RewardsClaimed(address indexed account, address indexed recipient, uint256 amount);
     /// @dev Emitted when the reward rate is updated.
     event RewardRateSet(uint256 rewardRate);
     /// @dev Emitted when the unstake cooldown is updated.
@@ -61,6 +65,8 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     /// @dev Emitted when the reward recipient of an account is updated.
     event RewardsRecipientSet(address indexed account, address indexed recipient);
 
+    /// @dev Emitted when an account unstakes to the zero address.
+    error InvalidUnstakeRecipient();
     /// @dev The account is already an eligible account.
     error EligibleAccountAlreadyExists(address account);
     /// @dev The account is not an eligible account.
@@ -110,6 +116,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
      * NOTE: Unstaked tokens can only be released after {_unstakeCooldownPeriod}.
      */
     function unstake(address recipient, uint256 amount) public virtual {
+        require(recipient != address(0), InvalidUnstakeRecipient());
         _burn(msg.sender, amount);
 
         ProtocolStakingStorage storage $ = _getProtocolStakingStorage();
@@ -139,6 +146,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
         if (amountToRelease > 0) {
             $._released[account] = totalAmountCooledDown;
             IERC20(stakingToken()).safeTransfer(account, amountToRelease);
+            emit TokensReleased(account, amountToRelease);
         }
     }
 
@@ -150,7 +158,9 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
         uint256 rewards = earned(account);
         if (rewards > 0) {
             _getProtocolStakingStorage()._paid[account] += SafeCast.toInt256(rewards);
-            IERC20Mintable(stakingToken()).mint(rewardsRecipient(account), rewards);
+            address recipient = rewardsRecipient(account);
+            IERC20Mintable(stakingToken()).mint(recipient, rewards);
+            emit RewardsClaimed(account, recipient, rewards);
         }
     }
 

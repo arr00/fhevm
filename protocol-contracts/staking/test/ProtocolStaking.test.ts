@@ -140,6 +140,12 @@ describe('Protocol Staking', function () {
         .withArgs(this.mock, this.staker2, ethers.parseEther('50'));
     });
 
+    it('should not unstake to zero address', async function () {
+      await expect(
+        this.mock.connect(this.staker1).unstake(ethers.ZeroAddress, ethers.parseEther('50')),
+      ).to.be.revertedWithCustomError(this.mock, 'InvalidUnstakeRecipient');
+    });
+
     describe('Release', function () {
       it('should transfer after cooldown complete', async function () {
         await this.mock.connect(this.admin).setUnstakeCooldownPeriod(60); // 1 minute
@@ -148,11 +154,9 @@ describe('Protocol Staking', function () {
 
         await timeIncreaseNoMine(60);
 
-        await expect(this.mock.release(this.staker1)).to.changeTokenBalance(
-          this.token,
-          this.staker1,
-          ethers.parseEther('50'),
-        );
+        const tx = await this.mock.release(this.staker1);
+        await expect(tx).to.changeTokenBalance(this.token, this.staker1, ethers.parseEther('50'));
+        await expect(tx).to.emit(this.mock, 'TokensReleased').withArgs(this.staker1, ethers.parseEther('50'));
         await expect(this.mock.releasableAfterCooldown(this.staker1)).to.eventually.eq(ethers.parseEther('0'));
       });
 
@@ -252,7 +256,9 @@ describe('Protocol Staking', function () {
       const earned = await this.mock.earned(this.staker1);
       await expect(this.mock.claimRewards(this.staker1))
         .to.emit(this.token, 'Transfer')
-        .withArgs(ethers.ZeroAddress, this.staker1, earned);
+        .withArgs(ethers.ZeroAddress, this.staker1, earned)
+        .to.emit(this.mock, 'RewardsClaimed')
+        .withArgs(this.staker1, this.staker1, earned);
     });
 
     it('should be able to set recipient', async function () {
@@ -265,7 +271,9 @@ describe('Protocol Staking', function () {
 
       await expect(this.mock.claimRewards(this.staker1))
         .to.emit(this.token, 'Transfer')
-        .withArgs(ethers.ZeroAddress, this.staker2, anyValue);
+        .withArgs(ethers.ZeroAddress, this.staker2, anyValue)
+        .to.emit(this.mock, 'RewardsClaimed')
+        .withArgs(this.staker1, this.staker2, anyValue);
     });
   });
 
