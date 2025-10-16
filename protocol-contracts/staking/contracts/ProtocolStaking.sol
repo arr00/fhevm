@@ -45,8 +45,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     bytes32 private constant PROTOCOL_STAKING_STORAGE_LOCATION =
         0x6867237db38693700f305f18dff1dbf600e282237f7d452b4c792e6b019c6b00;
     bytes32 private constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-    bytes32 private constant CONFIGURATOR_ROLE = keccak256("CONFIGURATOR_ROLE");
-    bytes32 private constant ELIGIBILITY_MANAGER_ROLE = keccak256("ELIGIBILITY_MANAGER_ROLE");
+    bytes32 private constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
     bytes32 private constant ELIGIBLE_ACCOUNT_ROLE = keccak256("eligible-account-role");
 
     event TokensStaked(address indexed account, uint256 amount);
@@ -73,14 +72,12 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
         address stakingToken_,
         address governor,
         address upgrader,
-        address configurator,
-        address eligibilityManager,
+        address manager,
         uint256 initialUnstakeCooldownPeriod
     ) public virtual initializer {
         __AccessControlDefaultAdminRules_init(0, governor);
         _grantRole(UPGRADER_ROLE, upgrader);
-        _grantRole(CONFIGURATOR_ROLE, configurator);
-        _grantRole(ELIGIBILITY_MANAGER_ROLE, eligibilityManager);
+        _grantRole(MANAGER_ROLE, manager);
         __ERC20_init(name, symbol);
         __EIP712_init(name, version);
         _getProtocolStakingStorage()._stakingToken = stakingToken_;
@@ -141,8 +138,8 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
         }
     }
 
-    /// @dev Sets the reward rate in tokens per second. Only callable by `CONFIGURATOR_ROLE` role.
-    function setRewardRate(uint256 rewardRate) public virtual onlyRole(CONFIGURATOR_ROLE) {
+    /// @dev Sets the reward rate in tokens per second. Only callable by `MANAGER_ROLE` role.
+    function setRewardRate(uint256 rewardRate) public virtual onlyRole(MANAGER_ROLE) {
         ProtocolStakingStorage storage $ = _getProtocolStakingStorage();
         $._lastUpdateReward = _historicalReward();
         $._lastUpdateTimestamp = Time.timestamp();
@@ -153,22 +150,22 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
 
     /**
      * @dev Adds the eligible account role to `account`. Only accounts with the eligible account role earn rewards for staked tokens.
-     * Only callable by the `ELIGIBILITY_MANAGER_ROLE` role.
+     * Only callable by the `MANAGER_ROLE` role.
      */
-    function addEligibleAccount(address account) public virtual onlyRole(ELIGIBILITY_MANAGER_ROLE) {
+    function addEligibleAccount(address account) public virtual onlyRole(MANAGER_ROLE) {
         require(_grantRole(ELIGIBLE_ACCOUNT_ROLE, account), EligibleAccountAlreadyExists(account));
     }
 
     /**
      * @dev Removes the eligible account role from `account`. `account` stops to earn rewards but maintains all existing rewards.
-     * Only callable by the `ELIGIBILITY_MANAGER_ROLE` role.
+     * Only callable by the `MANAGER_ROLE` role.
      */
-    function removeEligibleAccount(address account) public virtual onlyRole(ELIGIBILITY_MANAGER_ROLE) {
+    function removeEligibleAccount(address account) public virtual onlyRole(MANAGER_ROLE) {
         require(_revokeRole(ELIGIBLE_ACCOUNT_ROLE, account), EligibleAccountDoesNotExist(account));
     }
 
-    /// @dev Sets the {unstake} cooldown period in seconds to `unstakeCooldownPeriod`. Only callable by `CONFIGURATOR_ROLE` role.
-    function setUnstakeCooldownPeriod(uint256 unstakeCooldownPeriod_) public virtual onlyRole(CONFIGURATOR_ROLE) {
+    /// @dev Sets the {unstake} cooldown period in seconds to `unstakeCooldownPeriod`. Only callable by `MANAGER_ROLE` role.
+    function setUnstakeCooldownPeriod(uint256 unstakeCooldownPeriod_) public virtual onlyRole(MANAGER_ROLE) {
         _setUnstakeCooldownPeriod(unstakeCooldownPeriod_);
     }
 
