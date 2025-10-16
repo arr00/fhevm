@@ -214,6 +214,14 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
         return $._unstakeRequests[account].latest() - $._released[account];
     }
 
+    /**
+     * @dev Gets the current protocol reward rate in tokens distributed per second.
+     * @return The reward rate.
+     */
+    function rewardRate() public view returns (uint256) {
+        return _getProtocolStakingStorage()._rewardRate;
+    }
+
     /// @dev Returns the recipient for rewards earned by `account`.
     function rewardsRecipient(address account) public view virtual returns (address) {
         address storedRewardsRecipient = _getProtocolStakingStorage()._rewardsRecipient[account];
@@ -242,7 +250,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     }
 
     function _setUnstakeCooldownPeriod(uint256 unstakeCooldownPeriod_) internal virtual {
-        if (unstakeCooldownPeriod_ == 0) revert InvalidUnstakeCooldownPeriod();
+        require(unstakeCooldownPeriod_ != 0, InvalidUnstakeCooldownPeriod());
         _getProtocolStakingStorage()._unstakeCooldownPeriod = unstakeCooldownPeriod_;
 
         emit UnstakeCooldownPeriodSet(unstakeCooldownPeriod_);

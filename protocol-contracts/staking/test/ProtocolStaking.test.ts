@@ -54,6 +54,12 @@ describe('Protocol Staking', function () {
     await this.mock.connect(this.configurator).setUnstakeCooldownPeriod(100);
     await expect(this.mock.unstakeCooldownPeriod()).to.eventually.eq(100);
   });
+  
+  it('should return reward rate', async function () {
+    await expect(this.mock.rewardRate()).to.eventually.eq(0);
+    await this.mock.connect(this.admin).setRewardRate(ethers.parseEther('0.5'));
+    await expect(this.mock.rewardRate()).to.eventually.eq(ethers.parseEther('0.5'));
+  });
 
   describe('Access Control', function () {
     it('should not set unstake cooldown period if not authorized', async function () {
