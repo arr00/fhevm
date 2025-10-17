@@ -57,7 +57,7 @@ contract ProtocolOperatorRegistry {
     }
 
     /**
-     * @dev Gets the staking account address of an operator account.
+     * @dev Gets the staking account associated with an operator account.
      * @param account The operator account.
      * @return The staking account.
      */

@@ -17,7 +17,7 @@ interface IERC20Mintable is IERC20 {
 }
 
 /**
- * @dev Rewards eligible accounts staking tokens on this contract.
+ * @dev Staking contract that distributes newly minted tokens to eligible accounts at a configurable flow rate.
  * @custom:security-contact hello@zama.ai
  */
 contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20VotesUpgradeable, UUPSUpgradeable {
@@ -121,7 +121,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
      * @param recipient The recipient where unstaked tokens should be sent.
      * @param amount The amount of tokens to unstake.
      *
-     * NOTE: Unstaked tokens can only be released after {_unstakeCooldownPeriod}.
+     * NOTE: Unstaked tokens are released by calling {release} after {unstakeCooldownPeriod}.
      */
     function unstake(address recipient, uint256 amount) public {
         require(recipient != address(0), InvalidUnstakeRecipient());
@@ -142,7 +142,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
 
     /**
      * @dev Releases tokens requested for unstaking after the cooldown period to `account`.
-     * @param account The account whose tokens can be released after the cooldown period.
+     * @param account The account to release tokens to.
      *
      * WARNING: If this contract is upgraded to add slashing, the ability to withdraw to a
      * different address should be reconsidered.
@@ -160,7 +160,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
 
     /**
      * @dev Claim staking rewards for `account`. Can be called by anyone.
-     * @param account The account from which earned rewards can be claimed.
+     * @param account The account to claim rewards for.
      */
     function claimRewards(address account) public {
         uint256 rewards = earned(account);
@@ -174,7 +174,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
 
     /**
      * @dev Sets the reward rate in tokens per second. Only callable by `MANAGER_ROLE` role.
-     * @param rewardRate_ The new reward rate.
+     * @param rewardRate_ The new reward rate in tokens per second.
      */
     function setRewardRate(uint256 rewardRate_) public onlyRole(MANAGER_ROLE) {
         ProtocolStakingStorage storage $ = _getProtocolStakingStorage();
@@ -188,7 +188,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     /**
      * @dev Adds the eligible account role to `account`. Only accounts with the eligible account
      * role earn rewards for staked tokens. Only callable by the `MANAGER_ROLE` role.
-     * @param account The account requested to be eligible.
+     * @param account The account to grant the `ELIGIBLE_ACCOUNT_ROLE` role to.
      */
     function addEligibleAccount(address account) public onlyRole(MANAGER_ROLE) {
         require(_grantRole(ELIGIBLE_ACCOUNT_ROLE, account), EligibleAccountAlreadyExists(account));
@@ -197,7 +197,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     /**
      * @dev Removes the eligible account role from `account`. `account` stops to earn rewards
      * but maintains all existing rewards. Only callable by the `MANAGER_ROLE` role.
-     * @param account The account requested to be ineligible.
+     * @param account The account to revoke the `ELIGIBLE_ACCOUNT_ROLE` role from.
      */
     function removeEligibleAccount(address account) public onlyRole(MANAGER_ROLE) {
         require(_revokeRole(ELIGIBLE_ACCOUNT_ROLE, account), EligibleAccountDoesNotExist(account));
@@ -215,7 +215,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     /**
      * @dev Sets the reward recipient for `msg.sender` to `recipient`. All future rewards for
      * `msg.sender` will be sent to `recipient`.
-     * @param recipient The recipient that will receive future rewards of the `msg.sender`.
+     * @param recipient The recipient that will receive rewards on behalf of `msg.sender` for all future  {claimRewards} calls.
      */
     function setRewardsRecipient(address recipient) public {
         _getProtocolStakingStorage()._rewardsRecipient[msg.sender] = recipient;
@@ -225,7 +225,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
 
     /**
      * @dev Gets the amount of rewards earned by `account` at the current `block.timestamp`.
-     * @param account The account that earned rewards.
+     * @param account The account to check rewards for.
      * @return The earned amount.
      */
     function earned(address account) public view returns (uint256) {
@@ -242,7 +242,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     }
 
     /**
-     * @dev Gets the staking weight for a given raw amount.
+     * @dev Gets the staking weight for a given amount of tokens.
      * @param amount The amount being weighted.
      * @return The staking weight.
      */
