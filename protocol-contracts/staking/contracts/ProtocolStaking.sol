@@ -255,10 +255,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
         return _getProtocolStakingStorage()._totalEligibleStakedWeight;
     }
 
-    /**
-     * @dev Returns the current unstake cooldown period in seconds.
-     * @return The unstake cooldown period.
-     */
+    /// @dev Returns the current unstake cooldown period in seconds.
     function unstakeCooldownPeriod() public view returns (uint256) {
         return _getProtocolStakingStorage()._unstakeCooldownPeriod;
     }
