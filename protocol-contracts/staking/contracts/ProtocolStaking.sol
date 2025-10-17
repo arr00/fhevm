@@ -195,7 +195,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     }
 
     /**
-     * @dev Removes the eligible account role from `account`. `account` stops to earn rewards 
+     * @dev Removes the eligible account role from `account`. `account` stops to earn rewards
      * but maintains all existing rewards. Only callable by the `MANAGER_ROLE` role.
      * @param account The account requested to be ineligible.
      */

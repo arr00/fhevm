@@ -5,7 +5,7 @@ pragma solidity ^0.8.27;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
- * @dev This contract creates a registry for operator to indicate which account holds their staked tokens.
+ * @dev This contract creates a registry for operator to indicate which account holds their staking account.
  * @custom:security-contact hello@zama.ai
  */
 contract ProtocolOperatorRegistry {
@@ -20,25 +20,25 @@ contract ProtocolOperatorRegistry {
         0xf4991778404f39da1b7149b42e8195e0a86139aeb8fe7585bc5520f58085de00;
 
     /// @dev Emitted when the staking account is set for a given `operator`.
-    event StakedTokensAccountSet(
+    event StakingAccountSet(
         address indexed operator,
-        address indexed previousStakedTokensAccount,
-        address indexed newStakedTokensAccount
+        address indexed previousStakingAccount,
+        address indexed newStakingAccount
     );
 
     /// @dev The caller is not the owner of the staking account.
     error StakingAccountNotOwnedByCaller();
 
     /**
-     * @dev Sets the staked tokens account for an operator `msg.sender`. Operators may unset their
-     * staked tokens account by calling this function with `address(0)`.
+     * @dev Sets the staking account for an operator `msg.sender`. Operators may unset their
+     * staking account by calling this function with `address(0)`.
      * @param account The staking account being set by the owner.
      *
      * Requirements:
      *
      * - `msg.sender` must be the {Ownable-owner} of `account`.
      */
-    function setStakedTokensAccount(address account) public {
+    function setStakingAccount(address account) public {
         ProtocolOperatorRegistryStorage storage $ = _getProtocolOperatorRegistryStorage();
         if (account != address(0)) {
             require(Ownable(account).owner() == msg.sender, StakingAccountNotOwnedByCaller());
@@ -49,24 +49,24 @@ contract ProtocolOperatorRegistry {
             $._operators[account] = msg.sender;
         }
 
-        address currentStakedTokensAccount = stakedTokens(msg.sender);
-        if (currentStakedTokensAccount != address(0)) {
-            $._operators[currentStakedTokensAccount] = address(0);
+        address currentStakingAccount = stakingAccount(msg.sender);
+        if (currentStakingAccount != address(0)) {
+            $._operators[currentStakingAccount] = address(0);
         }
-        _setStakingAccount(msg.sender, currentStakedTokensAccount, account);
+        _setStakingAccount(msg.sender, currentStakingAccount, account);
     }
 
     /**
      * @dev Gets the staking account address of an operator account.
      * @param account The operator account.
-     * @return The staked tokens.
+     * @return The staking account.
      */
-    function stakedTokens(address account) public view returns (address) {
+    function stakingAccount(address account) public view returns (address) {
         return _getProtocolOperatorRegistryStorage()._stakingAccounts[account];
     }
 
     /**
-     * @dev Gets operator account associated with a given staked tokens account.
+     * @dev Gets operator account associated with a given staking account.
      * @param account The staking account.
      * @return The operator.
      */
@@ -77,7 +77,7 @@ contract ProtocolOperatorRegistry {
     /// @dev Sets the staking account of an operator.
     function _setStakingAccount(address operator_, address oldStakingAccount, address newStakingAccount) private {
         _getProtocolOperatorRegistryStorage()._stakingAccounts[operator_] = newStakingAccount;
-        emit StakedTokensAccountSet(operator_, oldStakingAccount, newStakingAccount);
+        emit StakingAccountSet(operator_, oldStakingAccount, newStakingAccount);
     }
 
     function _getProtocolOperatorRegistryStorage() private pure returns (ProtocolOperatorRegistryStorage storage $) {
