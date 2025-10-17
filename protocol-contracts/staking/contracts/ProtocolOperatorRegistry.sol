@@ -19,7 +19,7 @@ contract ProtocolOperatorRegistry {
     bytes32 private constant PROTOCOL_OPERATOR_REGISTRY_STORAGE_LOCATION =
         0xf4991778404f39da1b7149b42e8195e0a86139aeb8fe7585bc5520f58085de00;
 
-    /// @dev Emitted when a caller sets its staking account.
+    /// @dev Emitted when the staking account is set for a given `operator`.
     event StakedTokensAccountSet(
         address indexed operator,
         address indexed previousStakedTokensAccount,
