@@ -73,6 +73,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     error EligibleAccountAlreadyExists(address account);
     /// @dev The account is not an eligible account.
     error EligibleAccountDoesNotExist(address account);
+    /// @dev The account cannot be made eligible.
     error InvalidEligibleAccount(address account);
     /// @dev The tokens cannot be transferred.
     error TransferDisabled();
@@ -173,20 +174,20 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
 
     /**
      * @dev Sets the reward rate in tokens per second. Only callable by `MANAGER_ROLE` role.
-     * @param rewardRate The new reward rate.
+     * @param rewardRate_ The new reward rate.
      */
-    function setRewardRate(uint256 rewardRate) public onlyRole(MANAGER_ROLE) {
+    function setRewardRate(uint256 rewardRate_) public onlyRole(MANAGER_ROLE) {
         ProtocolStakingStorage storage $ = _getProtocolStakingStorage();
         $._lastUpdateReward = _historicalReward();
         $._lastUpdateTimestamp = Time.timestamp();
-        $._rewardRate = rewardRate;
+        $._rewardRate = rewardRate_;
 
-        emit RewardRateSet(rewardRate);
+        emit RewardRateSet(rewardRate_);
     }
 
     /**
-     * @dev Adds the eligible account role to `account`. Only accounts with the eligible account role earn rewards for staked tokens.
-     * Only callable by the `MANAGER_ROLE` role.
+     * @dev Adds the eligible account role to `account`. Only accounts with the eligible account
+     * role earn rewards for staked tokens. Only callable by the `MANAGER_ROLE` role.
      * @param account The account requested to be eligible.
      */
     function addEligibleAccount(address account) public onlyRole(MANAGER_ROLE) {
@@ -194,8 +195,8 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     }
 
     /**
-     * @dev Removes the eligible account role from `account`. `account` stops to earn rewards but maintains all existing rewards.
-     * Only callable by the `MANAGER_ROLE` role.
+     * @dev Removes the eligible account role from `account`. `account` stops to earn rewards 
+     * but maintains all existing rewards. Only callable by the `MANAGER_ROLE` role.
      * @param account The account requested to be ineligible.
      */
     function removeEligibleAccount(address account) public onlyRole(MANAGER_ROLE) {
@@ -203,7 +204,8 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     }
 
     /**
-     * @dev Sets the {unstake} cooldown period in seconds to `unstakeCooldownPeriod`. Only callable by `MANAGER_ROLE` role.
+     * @dev Sets the {unstake} cooldown period in seconds to `unstakeCooldownPeriod`. Only callable
+     * by `MANAGER_ROLE` role.
      * @param unstakeCooldownPeriod_ The new unstake cooldown period.
      */
     function setUnstakeCooldownPeriod(uint256 unstakeCooldownPeriod_) public onlyRole(MANAGER_ROLE) {
@@ -211,7 +213,8 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     }
 
     /**
-     * @dev Sets the reward recipient for `msg.sender` to `recipient`. All future rewards for `msg.sender` will be sent to `recipient`.
+     * @dev Sets the reward recipient for `msg.sender` to `recipient`. All future rewards for
+     * `msg.sender` will be sent to `recipient`.
      * @param recipient The recipient that will receive future rewards of the `msg.sender`.
      */
     function setRewardsRecipient(address recipient) public {
