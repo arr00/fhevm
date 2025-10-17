@@ -250,10 +250,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
         return Math.sqrt(amount);
     }
 
-    /**
-     * @dev Gets the current total staked weight.
-     * @return The total staked weight.
-     */
+    /// @dev Returns the current total staked weight.
     function totalStakedWeight() public view returns (uint256) {
         return _getProtocolStakingStorage()._totalEligibleStakedWeight;
     }
