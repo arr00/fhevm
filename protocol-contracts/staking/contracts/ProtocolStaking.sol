@@ -261,7 +261,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
     }
 
     /**
-     * @dev Gets the amount of tokens that can be released at the end of the cooldown period
+     * @dev Gets the amount of tokens that have been unstaked but not released yet
      * for a given account `account`.
      * @param account The account having tokens cooling down.
      * @return The releasable amount of tokens after the cooldown period.
