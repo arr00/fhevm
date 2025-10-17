@@ -18,7 +18,7 @@ interface IERC20Mintable is IERC20 {
 
 /**
  * @dev Staking contract that distributes newly minted tokens to eligible accounts at a configurable flow rate.
- * @custom:security-contact hello@zama.ai
+ * @custom:security-contact security@zama.ai
  */
 contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20VotesUpgradeable, UUPSUpgradeable {
     using Checkpoints for Checkpoints.Trace208;

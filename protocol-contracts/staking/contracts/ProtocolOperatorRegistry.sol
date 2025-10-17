@@ -6,7 +6,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @dev This contract creates a registry for operator to indicate which account holds their staking account.
- * @custom:security-contact hello@zama.ai
+ * @custom:security-contact security@zama.ai
  */
 contract ProtocolOperatorRegistry {
     /// @custom:storage-location erc7201:zama.storage.ProtocolOperatorRegistry
