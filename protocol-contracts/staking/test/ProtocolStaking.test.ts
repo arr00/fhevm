@@ -28,7 +28,7 @@ describe('Protocol Staking', function () {
 
     await Promise.all(
       [staker1, staker2].flatMap(account => [
-        token.mint(account, ethers.parseEther('1000')),
+        token.mint(account, ethers.parseEther('1001')),
         token.$_approve(account, mock, ethers.MaxUint256),
       ]),
     );
