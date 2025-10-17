@@ -236,10 +236,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
         return SafeCast.toUint256(SafeCast.toInt256(allocation) - $._paid[account]);
     }
 
-    /**
-     * @dev Gets the staking token which is used for staking and rewards.
-     * @return The staking token.
-     */
+   /// @dev Returns the staking token which is used for staking and rewards.
     function stakingToken() public view returns (address) {
         return _getProtocolStakingStorage()._stakingToken;
     }
