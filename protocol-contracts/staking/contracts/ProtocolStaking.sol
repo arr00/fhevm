@@ -121,7 +121,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
      * @dev Unstake `amount` tokens from `msg.sender`'s staked balance to `recipient`.
      * @param recipient The recipient where unstaked tokens should be sent.
      * @param amount The amount of tokens to unstake.
-     * @return releaseTime The time when the unstaked tokens can be released.
+     * @return releaseTime The timestamp when the unstaked tokens can be released.
      *
      * NOTE: Unstaked tokens are released by calling {release} after {unstakeCooldownPeriod}.
      */
