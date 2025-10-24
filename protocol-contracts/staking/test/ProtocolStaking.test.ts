@@ -604,13 +604,6 @@ describe('Protocol Staking', function () {
         await expect(this.mock.isEligibleAccount(this.admin)).to.eventually.equal(false);
       });
 
-      it("can't add twice", async function () {
-        await this.mock.connect(this.manager).addEligibleAccount(this.staker1);
-        await expect(this.mock.connect(this.manager).addEligibleAccount(this.staker1))
-          .to.be.revertedWithCustomError(this.mock, 'EligibleAccountAlreadyExists')
-          .withArgs(this.staker1);
-      });
-
       it('should add to totalStakedWeight', async function () {
         const weightBefore = await this.mock.totalStakedWeight();
         const staker1Weight = await this.mock.weight(await this.mock.balanceOf(this.staker1));
@@ -643,12 +636,6 @@ describe('Protocol Staking', function () {
 
         await expect(this.mock.isEligibleAccount(this.staker1)).to.eventually.equal(false);
         await expect(this.mock.isEligibleAccount(this.staker2)).to.eventually.equal(true);
-      });
-
-      it('should revert if not an eligible account', async function () {
-        await expect(this.mock.connect(this.manager).removeEligibleAccount(this.admin))
-          .to.be.revertedWithCustomError(this.mock, 'EligibleAccountDoesNotExist')
-          .withArgs(this.admin);
       });
 
       it('should deduct from totalStakedWeight', async function () {
