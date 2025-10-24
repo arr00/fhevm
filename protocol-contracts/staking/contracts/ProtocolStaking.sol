@@ -100,6 +100,7 @@ contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20Vote
         __AccessControlDefaultAdminRules_init(0, governor);
         _grantRole(UPGRADER_ROLE, upgrader);
         _grantRole(MANAGER_ROLE, manager);
+        _setRoleAdmin(ELIGIBLE_ACCOUNT_ROLE, MANAGER_ROLE);
         __ERC20_init(name, symbol);
         __EIP712_init(name, version);
         _getProtocolStakingStorage()._stakingToken = stakingToken_;

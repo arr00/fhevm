@@ -5,6 +5,7 @@ import { ethers, upgrades } from 'hardhat';
 
 const timeIncreaseNoMine = (duration: number) =>
   time.latest().then(clock => time.setNextBlockTimestamp(clock + duration));
+const eligibleAccountRole = ethers.id('ELIGIBLE_ACCOUNT_ROLE');
 
 /* eslint-disable no-unexpected-multiline */
 describe('Protocol Staking', function () {
@@ -85,6 +86,21 @@ describe('Protocol Staking', function () {
         this.mock,
         'AccessControlUnauthorizedAccount',
       );
+    });
+
+    it('should not grant eligible account role if not role admin', async function () {
+      await expect(
+        this.mock.connect(this.admin).grantRole(eligibleAccountRole, this.anyone.address),
+      ).to.be.revertedWithCustomError(this.mock, 'AccessControlUnauthorizedAccount');
+      await this.mock.connect(this.manager).grantRole(eligibleAccountRole, this.anyone.address);
+    });
+
+    it('should not revoke eligible account role if not role admin', async function () {
+      await this.mock.connect(this.manager).grantRole(eligibleAccountRole, this.anyone.address);
+      await expect(
+        this.mock.connect(this.admin).revokeRole(eligibleAccountRole, this.anyone.address),
+      ).to.be.revertedWithCustomError(this.mock, 'AccessControlUnauthorizedAccount');
+      await this.mock.connect(this.manager).revokeRole(eligibleAccountRole, this.anyone.address);
     });
 
     it('should not upgrade if not authorized', async function () {
@@ -576,7 +592,7 @@ describe('Protocol Staking', function () {
       it('should emit event', async function () {
         await expect(this.mock.connect(this.manager).addEligibleAccount(this.staker1))
           .to.emit(this.mock, 'RoleGranted')
-          .withArgs(ethers.id('ELIGIBLE_ACCOUNT_ROLE'), this.staker1, this.manager);
+          .withArgs(eligibleAccountRole, this.staker1, this.manager);
       });
 
       it('should reflect in eligible account storage', async function () {
@@ -619,7 +635,7 @@ describe('Protocol Staking', function () {
       it('should emit event', async function () {
         await expect(this.mock.connect(this.manager).removeEligibleAccount(this.staker1))
           .to.emit(this.mock, 'RoleRevoked')
-          .withArgs(ethers.id('ELIGIBLE_ACCOUNT_ROLE'), this.staker1, this.manager);
+          .withArgs(eligibleAccountRole, this.staker1, this.manager);
       });
 
       it('should reflect in eligible account list', async function () {
