@@ -113,6 +113,10 @@ contract OperatorStaking is ERC20, Ownable {
         ProtocolStaking protocolStaking_ = protocolStaking();
         _burn(owner, shares);
 
+        if (protocolStaking().balanceOf(address(this)) < assetsToWithdraw) {
+            restake();
+        }
+
         (, uint48 lastReleaseTime, uint208 totalSharesRedeemed) = _unstakeRequests[controller].latestCheckpoint();
         _totalSharesInRedemption += shares;
 

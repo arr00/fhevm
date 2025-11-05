@@ -194,6 +194,16 @@ describe('OperatorStaking', function () {
         .withArgs(this.mock, staker3, ethers.parseEther('1'));
     });
 
+    it('redemption automatically restakes as necessary', async function () {
+      await this.mock.connect(this.staker1).deposit(ethers.parseEther('1'), this.staker1);
+
+      await this.token.connect(this.staker2).transfer(this.mock, 2);
+
+      await expect(this.mock.connect(this.staker1).requestRedeem(ethers.parseEther('1'), this.staker1, this.staker1))
+        .to.emit(this.token, 'Transfer')
+        .withArgs(this.mock, this.protocolStaking, 2);
+    });
+
     describe('with operator', async function () {
       beforeEach(async function () {
         this.operator = this.accounts[0];
