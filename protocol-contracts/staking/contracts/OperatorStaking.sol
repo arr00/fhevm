@@ -124,13 +124,13 @@ contract OperatorStaking is ERC20, Ownable, ReentrancyGuardTransient {
             SafeCast.toInt256(
                 IERC20(asset()).balanceOf(address(this)) + protocolStaking_.awaitingRelease(address(this))
             );
-        uint48 releaseTime;
 
         (, uint48 lastReleaseTime, uint208 controllerSharesRedeemed) = _unstakeRequests[controller].latestCheckpoint();
-
-        releaseTime = protocolStaking_.unstake(address(this), SafeCast.toUint256(SignedMath.max(assetsToWithdraw, 0)));
+        uint48 releaseTime = protocolStaking_.unstake(
+            address(this),
+            SafeCast.toUint256(SignedMath.max(assetsToWithdraw, 0))
+        );
         assert(releaseTime >= lastReleaseTime); // should never happen
-
         _unstakeRequests[controller].push(releaseTime, controllerSharesRedeemed + shares);
 
         emit RedeemRequest(controller, owner, 0, msg.sender, shares);
