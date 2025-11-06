@@ -113,17 +113,30 @@ contract OperatorStaking is ERC20, Ownable, ReentrancyGuardTransient {
         if (msg.sender != owner) {
             _spendAllowance(owner, msg.sender, shares);
         }
-
-        uint256 assetsToWithdraw = previewRedeem(shares);
-        ProtocolStaking protocolStaking_ = protocolStaking();
         _burn(owner, shares);
 
-        (, uint48 lastReleaseTime, uint208 totalSharesRedeemed) = _unstakeRequests[controller].latestCheckpoint();
-        _totalSharesInRedemption += shares;
+        uint256 newTotalSharesInRedemption = totalSharesInRedemption() + shares;
+        _totalSharesInRedemption = newTotalSharesInRedemption;
 
-        uint48 releaseTime = protocolStaking_.unstake(address(this), assetsToWithdraw);
-        assert(releaseTime >= lastReleaseTime); // should never happen
-        _unstakeRequests[controller].push(releaseTime, totalSharesRedeemed + shares);
+        ProtocolStaking protocolStaking_ = protocolStaking();
+        int256 assetsToWithdraw = SafeCast.toInt256(previewRedeem(newTotalSharesInRedemption)) -
+            SafeCast.toInt256(
+                IERC20(asset()).balanceOf(address(this)) + protocolStaking_.awaitingRelease(address(this))
+            );
+        uint48 releaseTime;
+
+        (, uint48 lastReleaseTime, uint208 controllerSharesRedeemed) = _unstakeRequests[controller].latestCheckpoint();
+
+        if (assetsToWithdraw > 0) {
+            releaseTime = protocolStaking_.unstake(address(this), SafeCast.toUint256(assetsToWithdraw));
+            assert(releaseTime >= lastReleaseTime); // should never happen
+        } else {
+            // We have enough excess tokens to cover the request without unstaking
+            releaseTime = SafeCast.toUint48(
+                Math.max(Time.timestamp() + protocolStaking_.unstakeCooldownPeriod(), lastReleaseTime)
+            );
+        }
+        _unstakeRequests[controller].push(releaseTime, controllerSharesRedeemed + shares);
 
         emit RedeemRequest(controller, owner, 0, msg.sender, shares);
     }
@@ -170,9 +183,7 @@ contract OperatorStaking is ERC20, Ownable, ReentrancyGuardTransient {
      */
     function restake() public virtual {
         ProtocolStaking protocolStaking_ = protocolStaking();
-        uint256 amountToRestake = IERC20(asset()).balanceOf(address(this)) +
-            protocolStaking_.awaitingRelease(address(this)) -
-            previewRedeem(totalSharesInRedemption());
+        uint256 amountToRestake = IERC20(asset()).balanceOf(address(this)) - previewRedeem(totalSharesInRedemption());
         protocolStaking_.stake(amountToRestake);
     }
 
