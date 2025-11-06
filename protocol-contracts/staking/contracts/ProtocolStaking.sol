@@ -20,7 +20,7 @@ interface IERC20Mintable is IERC20 {
 /**
  * @dev Staking contract that distributes newly minted tokens to eligible accounts at a configurable flow rate.
  * 
- * NOTE: This staking contract does not support non-standard ERC-20 tokens such as fee on transfer or rebasing tokens.
+ * NOTE: This staking contract does not support non-standard ERC-20 tokens such as fee-on-transfer or rebasing tokens.
  * @custom:security-contact security@zama.ai
  */
 contract ProtocolStaking is AccessControlDefaultAdminRulesUpgradeable, ERC20VotesUpgradeable, UUPSUpgradeable {
