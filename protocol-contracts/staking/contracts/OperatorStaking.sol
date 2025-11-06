@@ -9,6 +9,7 @@ import {ERC4626, IERC4626} from "@openzeppelin/contracts/token/ERC20/extensions/
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {SignedMath} from "@openzeppelin/contracts/utils/math/SignedMath.sol";
 import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {Time} from "@openzeppelin/contracts/utils/types/Time.sol";
@@ -127,15 +128,9 @@ contract OperatorStaking is ERC20, Ownable, ReentrancyGuardTransient {
 
         (, uint48 lastReleaseTime, uint208 controllerSharesRedeemed) = _unstakeRequests[controller].latestCheckpoint();
 
-        if (assetsToWithdraw > 0) {
-            releaseTime = protocolStaking_.unstake(address(this), SafeCast.toUint256(assetsToWithdraw));
-            assert(releaseTime >= lastReleaseTime); // should never happen
-        } else {
-            // We have enough excess tokens to cover the request without unstaking
-            releaseTime = SafeCast.toUint48(
-                Math.max(Time.timestamp() + protocolStaking_.unstakeCooldownPeriod(), lastReleaseTime)
-            );
-        }
+        releaseTime = protocolStaking_.unstake(address(this), SafeCast.toUint256(SignedMath.max(assetsToWithdraw, 0)));
+        assert(releaseTime >= lastReleaseTime); // should never happen
+
         _unstakeRequests[controller].push(releaseTime, controllerSharesRedeemed + shares);
 
         emit RedeemRequest(controller, owner, 0, msg.sender, shares);
