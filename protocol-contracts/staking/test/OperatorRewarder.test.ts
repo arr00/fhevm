@@ -222,6 +222,12 @@ describe('OperatorRewarder', function () {
         .to.emit(this.token, 'Transfer')
         .withArgs(this.mock, this.admin, ethers.parseEther('0.25'));
     });
+
+    it('should not claim owner fee if not owner', async function () {
+      await expect(this.mock.connect(this.anyone).claimOwnerFee())
+        .to.be.revertedWithCustomError(this.mock, 'OwnableUnauthorizedAccount')
+        .withArgs(this.anyone);
+    });
   });
 
   describe('setOwnerFee', async function () {
