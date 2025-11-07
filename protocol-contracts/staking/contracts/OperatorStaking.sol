@@ -171,7 +171,7 @@ contract OperatorStaking is ERC20, Ownable, ReentrancyGuardTransient {
     }
 
     /**
-     * @dev Restake excess tokens held by this contract. Excess tokens held by this contract
+     * @dev Restake excess tokens held by this contract. Excess tokens held by this contract after
      * accounting for all in-flight redemptions are restaked into the `ProtocolStaking` contract.
      *
      * NOTE: Excess tokens will be in the `OperatorStaking` contract the operator is slashed
